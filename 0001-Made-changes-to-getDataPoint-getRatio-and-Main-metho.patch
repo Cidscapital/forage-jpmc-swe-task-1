@@ -1,0 +1,71 @@
+From 98d898a7ac4b98ca9c85dc17828e36700704df9e Mon Sep 17 00:00:00 2001
+From: Cidscapital <jesse.jason2002@gmail.com>
+Date: Tue, 10 Oct 2023 11:19:48 +0300
+Subject: [PATCH] Made changes to getDataPoint, getRatio and Main methods.
+
+---
+ client3.py | 11 ++++++++---
+ server3.py |  4 ++--
+ 2 files changed, 10 insertions(+), 5 deletions(-)
+
+diff --git a/client3.py b/client3.py
+index 3fc09b7..fa0b5d4 100644
+--- a/client3.py
++++ b/client3.py
+@@ -35,14 +35,17 @@ def getDataPoint(quote):
+     stock = quote['stock']
+     bid_price = float(quote['top_bid']['price'])
+     ask_price = float(quote['top_ask']['price'])
+-    price = bid_price
++    price = (bid_price + ask_price) / 2
+     return stock, bid_price, ask_price, price
+ 
+ 
+ def getRatio(price_a, price_b):
+     """ Get ratio of price_a and price_b """
+     """ ------------- Update this function ------------- """
+-    return 1
++    if (price_b == 0):
++            #when price_b is 0 avoid throwing ZeroDivisionError
++            return
++    return price_a/price_b
+ 
+ 
+ # Main
+@@ -52,8 +55,10 @@ if __name__ == "__main__":
+         quotes = json.loads(urllib.request.urlopen(QUERY.format(random.random())).read())
+ 
+         """ ----------- Update to get the ratio --------------- """
++        prices = {}
+         for quote in quotes:
+             stock, bid_price, ask_price, price = getDataPoint(quote)
++            prices[stock] = price
+             print("Quoted %s at (bid:%s, ask:%s, price:%s)" % (stock, bid_price, ask_price, price))
+ 
+-        print("Ratio %s" % getRatio(price, price))
++        print("Ratio %s" % getRatio(prices["ABC"], prices["DEF"]))
+diff --git a/server3.py b/server3.py
+index 1836de2..dbe8478 100644
+--- a/server3.py
++++ b/server3.py
+@@ -216,7 +216,7 @@ def get(req_handler, routes):
+                 return
+ 
+ 
+-def run(routes, host='0.0.0.0', port=8080):
++def run(routes, host='0.0.0.0', port=8000):
+     """ Runs a class as a server whose methods have been decorated with
+         @route.
+     """
+@@ -232,7 +232,7 @@ def run(routes, host='0.0.0.0', port=8080):
+     thread = threading.Thread(target=server.serve_forever)
+     thread.daemon = True
+     thread.start()
+-    print('HTTP server started on port 8080')
++    print('HTTP server started on port 8000')
+     while True:
+         from time import sleep
+         sleep(1)
+-- 
+2.40.0.windows.1
+
